@@ -33,7 +33,7 @@ jobs:
 
       - name: Run script
         run: |
-          python -u coin_stock_report_g_20260712_001.py
+          python -u coin_stock_report_g_github_20260712_001.py
 
       - name: Commit Excel
         run: |
