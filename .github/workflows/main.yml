@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
 
   schedule:
+    # 15:30 UTC = 8:30 AM California (PDT)
     - cron: "30 15 * * *"
 
 permissions:
@@ -14,9 +15,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout repository
+        uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v6
+      - name: Setup Python
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -31,19 +34,24 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run script
+      - name: Run report
         run: |
-          python -u coin_stock_report_g_github_20260712_001.py
+          python -u coin_stock_report_g_github_20260716_001.py
 
-      - name: Commit Excel
+      - name: Commit generated files
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
 
-          if [ -f market_data_greport.xlsx ]; then
-            git add market_data_greport.xlsx
-            git diff --cached --quiet || git commit -m "Automatic market update"
-            git push
+          # Add generated files if they exist
+          [ -f market_data_greport.xlsx ] && git add market_data_greport.xlsx
+          [ -f gATH_table.csv ] && git add gATH_table.csv
+          [ -f gATH.csv ] && git add gATH.csv
+
+          # Commit only if something changed
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
           else
-            echo "Excel file not found."
+            git commit -m "Automatic market update"
+            git push
           fi
